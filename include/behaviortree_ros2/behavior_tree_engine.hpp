@@ -45,8 +45,11 @@ public:
   /**
    * @brief A constructor for nav2_behavior_tree::BehaviorTreeEngine
    * @param plugin_libraries vector of BT plugin library names to load
+   * @param default_server_names vector of default BT server names
    */
   explicit BehaviorTreeEngine(const std::string& name, const std::vector<std::string> & plugin_libraries, const std::vector<std::string> & default_server_names);
+  explicit BehaviorTreeEngine(const std::string& name);
+
   virtual ~BehaviorTreeEngine() {}
 
   /**

@@ -39,7 +39,7 @@ BehaviorTreeEngine::BehaviorTreeEngine(const std::string& name, const std::vecto
   bool use_default_server_names = default_server_names.size() == plugin_libraries.size();
   if (!use_default_server_names) {
     RCLCPP_ERROR(
-      rclcpp::get_logger("BehaviorTreeEngine"),
+      node_->get_logger(),
       "Number of default server names does not match number of plugin libraries. Ignoring values...");
   }
   for (size_t i = 0; i < plugin_libraries.size(); i++) {
@@ -48,6 +48,42 @@ BehaviorTreeEngine::BehaviorTreeEngine(const std::string& name, const std::vecto
     }
     RegisterRosBTNode(factory_, loader.getOSName(plugin_libraries[i]), params);
   }
+  std::string tree_model = writeTreeNodesModelXML(factory_);
+  std::ofstream xml_file;
+  xml_file.open("/tree_model.xml");
+  xml_file << tree_model;
+  xml_file.close();
+}
+
+BehaviorTreeEngine::BehaviorTreeEngine(const std::string& name)
+  : node_(rclcpp::Node::make_shared(name, rclcpp::NodeOptions().arguments({
+    "--ros-args", "-r", name + ":" + std::string("__node:=") + name
+  })))
+{
+  node_->declare_parameter("native_plugin_lib_names", std::vector<std::string>({}));
+  std::vector<std::string> native_plugin_lib_names;
+  node_->get_parameter("native_plugin_lib_names", native_plugin_lib_names);
+
+  SharedLibrary loader;
+  // Register native plugins
+  for (const auto & p : native_plugin_lib_names) {
+    RCLCPP_DEBUG(node_->get_logger(), "Registering native plugin: %s", p.c_str());
+    factory_.registerFromPlugin(loader.getOSName(p));
+  }
+
+  node_->declare_parameter("ros_plugin_lib_names", std::vector<std::string>({}));
+  std::vector<std::string> ros_plugin_lib_names;
+  node_->get_parameter("ros_plugin_lib_names", ros_plugin_lib_names);
+
+  NodeParams params;
+  params.nh = node_;
+  for(const auto & p : ros_plugin_lib_names) {
+    RCLCPP_DEBUG(node_->get_logger(), "Registering ROS plugin: %s", p.c_str());
+    node_->declare_parameter(p + ".default_port_value", std::string(""));
+    node_->get_parameter(p + ".default_port_value", params.default_server_name);
+    RegisterRosBTNode(factory_, loader.getOSName(p), params);
+  }
+
   std::string tree_model = writeTreeNodesModelXML(factory_);
   std::ofstream xml_file;
   xml_file.open("/tree_model.xml");
@@ -81,7 +117,7 @@ BehaviorTreeEngine::run(
     }
   } catch (const std::exception & ex) {
     RCLCPP_ERROR(
-      rclcpp::get_logger("BehaviorTreeEngine"),
+      node_->get_logger(),
       "Behavior tree threw exception: %s. Exiting with failure.", ex.what());
     return BtStatus::FAILED;
   }

@@ -270,7 +270,7 @@ template<class T> inline
       // if (rclcpp::spin_until_future_complete(node_, future_response_, nodelay) !=
       //     rclcpp::FutureReturnCode::SUCCESS)
       // {
-      if (callback_group_executor_.spin_until_future_complete(future_response_, service_timeout_) !=
+      if (callback_group_executor_.spin_until_future_complete(future_response_, nodelay) !=
           rclcpp::FutureReturnCode::SUCCESS)
       {
         RCLCPP_WARN_ONCE( node_->get_logger(), "waiting response confirmation" );
