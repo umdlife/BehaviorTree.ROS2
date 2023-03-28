@@ -325,7 +325,7 @@ template<class T> inline
       auto nodelay = std::chrono::milliseconds(0);
       auto timeout = rclcpp::Duration::from_seconds( double(server_timeout_.count()) / 1000);
 
-      if (callback_group_executor_.spin_until_future_complete(future_goal_handle_, server_timeout_) !=
+      if (callback_group_executor_.spin_until_future_complete(future_goal_handle_, nodelay) !=
           rclcpp::FutureReturnCode::SUCCESS)
       {
         RCLCPP_WARN_ONCE( node_->get_logger(), "waiting goal confirmation" );
