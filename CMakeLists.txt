@@ -24,56 +24,57 @@ target_include_directories(bt_ros2 PRIVATE
 ament_target_dependencies(bt_ros2 ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 ######################################################
-rosidl_generate_interfaces(${PROJECT_NAME}
-    "action/Sleep.action")
+# rosidl_generate_interfaces(${PROJECT_NAME}
+#     "action/Sleep.action")
 
-# macro to remove some boiler plate
-function(add_target_dependencies target)
-    target_include_directories(${target} PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-    ament_target_dependencies(${target} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-    rosidl_target_interfaces(${target} ${PROJECT_NAME} "rosidl_typesupport_cpp")
-endfunction()
+# # macro to remove some boiler plate
+# function(add_target_dependencies target)
+#     target_include_directories(${target} PRIVATE
+#         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+#     ament_target_dependencies(${target} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+#     rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+#     target_link_libraries(${target} "${cpp_typesupport_target}")
+# endfunction()
 
-######################################################
-# Compile Sleep library as static dependeny or plugin
+# ######################################################
+# # Compile Sleep library as static dependeny or plugin
 
-add_library(sleep_plugin SHARED test/sleep_action.cpp)
-target_compile_definitions(sleep_plugin PRIVATE  BT_PLUGIN_EXPORT )
-add_target_dependencies(sleep_plugin)
+# add_library(sleep_plugin SHARED test/sleep_action.cpp)
+# target_compile_definitions(sleep_plugin PRIVATE  BT_PLUGIN_EXPORT )
+# add_target_dependencies(sleep_plugin)
 
-add_library(sleep_static STATIC test/sleep_action.cpp)
-add_target_dependencies(sleep_static)
+# add_library(sleep_static STATIC test/sleep_action.cpp)
+# add_target_dependencies(sleep_static)
 
-######################################################
-# Build two clients, one that use the plugin and the other
-# that links statically
+# ######################################################
+# # Build two clients, one that use the plugin and the other
+# # that links statically
 
-add_executable(sleep_client_dyn test/sleep_client.cpp)
-target_compile_definitions(sleep_client_dyn PRIVATE USE_SLEEP_PLUGIN )
-add_target_dependencies(sleep_client_dyn)
+# add_executable(sleep_client_dyn test/sleep_client.cpp)
+# target_compile_definitions(sleep_client_dyn PRIVATE USE_SLEEP_PLUGIN )
+# add_target_dependencies(sleep_client_dyn)
 
-add_executable(sleep_client test/sleep_client.cpp)
-target_link_libraries(sleep_client sleep_static )
-add_target_dependencies(sleep_client)
+# add_executable(sleep_client test/sleep_client.cpp)
+# target_link_libraries(sleep_client sleep_static )
+# add_target_dependencies(sleep_client)
 
-######################################################
-# Build Server
-add_executable(sleep_server test/sleep_server.cpp)
-add_target_dependencies(sleep_server)
+# ######################################################
+# # Build Server
+# add_executable(sleep_server test/sleep_server.cpp)
+# add_target_dependencies(sleep_server)
 
-######################################################
-# INSTALL
+# ######################################################
+# # INSTALL
 
-install(TARGETS
-  sleep_client
-  sleep_client_dyn
-  sleep_server
-  sleep_plugin
-  RUNTIME DESTINATION bin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  )
+# install(TARGETS
+#   sleep_client
+#   sleep_client_dyn
+#   sleep_server
+#   sleep_plugin
+#   RUNTIME DESTINATION lib/${PROJECT_NAME}
+#   ARCHIVE DESTINATION lib
+#   LIBRARY DESTINATION lib
+#   )
 
 install(
   DIRECTORY include/
