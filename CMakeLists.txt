@@ -18,73 +18,80 @@ find_package(behaviortree_cpp REQUIRED )
 find_package(ament_index_cpp REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-add_library(bt_ros2 src/bt_ros2.cpp)
-target_include_directories(bt_ros2 PRIVATE
+add_library(${PROJECT_NAME} src/bt_ros2.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-ament_target_dependencies(bt_ros2 ${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_target_dependencies(${PROJECT_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 ######################################################
-# rosidl_generate_interfaces(${PROJECT_NAME}
-#     "action/Sleep.action")
+rosidl_generate_interfaces(${PROJECT_NAME}_SLEEP
+    "action/Sleep.action")
 
-# # macro to remove some boiler plate
-# function(add_target_dependencies target)
-#     target_include_directories(${target} PRIVATE
-#         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-#     ament_target_dependencies(${target} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-#     rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
-#     target_link_libraries(${target} "${cpp_typesupport_target}")
-# endfunction()
+# macro to remove some boiler plate
+function(add_target_dependencies target)
+    target_include_directories(${target} PRIVATE
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
+    ament_target_dependencies(${target} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-# ######################################################
-# # Compile Sleep library as static dependeny or plugin
+    rosidl_get_typesupport_target(cpp_typesupport_target "${PROJECT_NAME}_SLEEP" "rosidl_typesupport_cpp")
+    target_link_libraries(${target} "${cpp_typesupport_target}")
+endfunction()
 
-# add_library(sleep_plugin SHARED test/sleep_action.cpp)
-# target_compile_definitions(sleep_plugin PRIVATE  BT_PLUGIN_EXPORT )
-# add_target_dependencies(sleep_plugin)
+######################################################
+# Compile Sleep library as static dependeny or plugin
 
-# add_library(sleep_static STATIC test/sleep_action.cpp)
-# add_target_dependencies(sleep_static)
+add_library(sleep_plugin SHARED test/sleep_action.cpp)
+target_compile_definitions(sleep_plugin PRIVATE  BT_PLUGIN_EXPORT )
+add_target_dependencies(sleep_plugin)
 
-# ######################################################
-# # Build two clients, one that use the plugin and the other
-# # that links statically
+add_library(sleep_static STATIC test/sleep_action.cpp)
+add_target_dependencies(sleep_static)
 
-# add_executable(sleep_client_dyn test/sleep_client.cpp)
-# target_compile_definitions(sleep_client_dyn PRIVATE USE_SLEEP_PLUGIN )
-# add_target_dependencies(sleep_client_dyn)
+######################################################
+# Build two clients, one that use the plugin and the other
+# that links statically
 
-# add_executable(sleep_client test/sleep_client.cpp)
-# target_link_libraries(sleep_client sleep_static )
-# add_target_dependencies(sleep_client)
+add_executable(sleep_client_dyn test/sleep_client.cpp)
+target_compile_definitions(sleep_client_dyn PRIVATE USE_SLEEP_PLUGIN )
+add_target_dependencies(sleep_client_dyn)
 
-# ######################################################
-# # Build Server
-# add_executable(sleep_server test/sleep_server.cpp)
-# add_target_dependencies(sleep_server)
+add_executable(sleep_client test/sleep_client.cpp)
+target_link_libraries(sleep_client sleep_static )
+add_target_dependencies(sleep_client)
 
-# ######################################################
-# # INSTALL
+######################################################
+# Build Server
+add_executable(sleep_server test/sleep_server.cpp)
+add_target_dependencies(sleep_server)
 
-# install(TARGETS
-#   sleep_client
-#   sleep_client_dyn
-#   sleep_server
-#   sleep_plugin
-#   RUNTIME DESTINATION lib/${PROJECT_NAME}
-#   ARCHIVE DESTINATION lib
-#   LIBRARY DESTINATION lib
-#   )
+######################################################
+# INSTALL
+
+install(TARGETS
+  sleep_client
+  sleep_client_dyn
+  sleep_server
+  sleep_plugin
+  RUNTIME DESTINATION bin
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  )
 
 install(
-  DIRECTORY include/
-  DESTINATION include
-)
+    TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
+  
+install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
+  
 
 ament_export_include_directories(include)
 
-ament_export_dependencies(behaviortree_cpp rosidl_default_runtime)
+ament_export_libraries(${PROJECT_NAME})
+
+ament_export_targets(${PROJECT_NAME})
+
+ament_export_dependencies(behaviortree_cpp rclcpp_action rclcpp)
 
 ament_package()
-
-
