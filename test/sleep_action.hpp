@@ -1,4 +1,5 @@
 #include <behaviortree_ros2/bt_action_node.hpp>
+#include "behaviortree_ros2/node_params.hpp"
 #include "behaviortree_ros2/action/sleep.hpp"
 
 using namespace BT;

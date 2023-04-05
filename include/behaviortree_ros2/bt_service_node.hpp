@@ -321,4 +321,3 @@ template<class T> inline
 
 
 }  // namespace BT
-

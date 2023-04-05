@@ -3,6 +3,7 @@
 #include <rclcpp/executors.hpp>
 
 #include "behaviortree_ros2/plugins.hpp"
+#include "behaviortree_ros2/node_params.hpp"
 
 #ifndef USE_SLEEP_PLUGIN
 #include "sleep_action.hpp"

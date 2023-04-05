@@ -63,7 +63,3 @@ void RegisterRosNode(BT::BehaviorTreeFactory& factory,
   auto func = (Func)loader.getSymbol("BT_RegisterRosNodeFromPlugin");
   func(factory, params);
 }
-
-
-
-
